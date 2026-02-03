@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from app import db
-from app.models import User, Barber, Service
-from app.forms import RegistrationForm, LoginForm
+from app.models import User
+# IMPORT PENTING YANG TADI KURANG:
+from app.forms import RegistrationForm, LoginForm 
 from flask_login import login_user, current_user, logout_user, login_required
+from werkzeug.security import check_password_hash
 
 main = Blueprint('main', __name__)
 
@@ -11,7 +13,7 @@ main = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
-# --- REGISTER (Disini Hashing Terjadi) ---
+# --- REGISTER ---
 @main.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -19,14 +21,10 @@ def register():
         
     form = RegistrationForm()
     if form.validate_on_submit():
-        # 1. Ambil data dari form
+        # Hash password otomatis dibuat di model (set_password)
         user = User(username=form.username.data, email=form.email.data, phone=form.phone.data)
-        
-        # 2. HASHING PASSWORD (Penting!)
-        # Fungsi ini akan mengubah 'rahasia123' menjadi 'pbkdf2:sha256:...'
         user.set_password(form.password.data)
         
-        # 3. Simpan ke MySQL
         db.session.add(user)
         db.session.commit()
         
@@ -45,7 +43,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         
-        # Cek Password Hash vs Input User
+        # Cek user ada DAN password cocok
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')

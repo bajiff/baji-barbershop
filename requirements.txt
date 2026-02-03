@@ -7,3 +7,4 @@ python-dotenv
 midtransclient
 alembic
 pytest
+email-validator
