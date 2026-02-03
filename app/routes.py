@@ -8,6 +8,9 @@ from werkzeug.security import check_password_hash
 from app.models import User, Barber, Service, Booking # Tambah Booking
 from app.forms import RegistrationForm, LoginForm, BookingForm # Tambah BookingForm
 from datetime import datetime
+import midtransclient
+import time # Untuk membuat Order ID unik
+from config import Config
 
 main = Blueprint('main', __name__)
 
@@ -95,9 +98,11 @@ def new_booking():
     form.barber_id.choices = [(b.id, b.name) for b in Barber.query.filter_by(is_active=True).all()]
     
     if form.validate_on_submit():
-        # Ambil list layanan berdasarkan ID yang dicentang
+        # 1. Hitung Total Harga dari Service yang dipilih
         selected_services = Service.query.filter(Service.id.in_(form.service_ids.data)).all()
+        total_price = sum(service.price for service in selected_services)
         
+        # 2. Simpan Booking ke Database dulu (Status: Unpaid)
         booking = Booking(
             user_id=current_user.id,
             barber_id=form.barber_id.data,
@@ -106,13 +111,51 @@ def new_booking():
             status='pending',
             payment_status='unpaid'
         )
-        
-        # Masukkan layanan-layanan ke dalam booking
-        booking.services = selected_services # SQLAlchemy otomatis isi tabel perantara
-        
+        booking.services = selected_services
         db.session.add(booking)
-        db.session.commit()
-        flash('Booking berhasil! Menunggu pembayaran.', 'success')
+        db.session.commit() # Commit agar dapat booking.id
+
+        # 3. REQUEST TOKEN KE MIDTRANS (SNAP API)
+        # Inisialisasi Snap
+        snap = midtransclient.Snap(
+            is_production=False,
+            server_key=Config.MIDTRANS_SERVER_KEY,
+            client_key=Config.MIDTRANS_CLIENT_KEY
+        )
+
+        # Buat Parameter Transaksi
+        # Order ID harus unik, kita gabungkan ID Booking + Timestamp
+        order_id = f"BAJI-{booking.id}-{int(time.time())}"
+        
+        param = {
+            "transaction_details": {
+                "order_id": order_id,
+                "gross_amount": int(total_price)
+            },
+            "customer_details": {
+                "first_name": current_user.username,
+                "email": current_user.email,
+                "phone": current_user.phone,
+            },
+            "item_details": [
+                {"id": s.id, "price": int(s.price), "quantity": 1, "name": s.name[:50]} 
+                for s in selected_services
+            ]
+        }
+
+        try:
+            # Minta Token
+            transaction = snap.create_transaction(param)
+            transaction_token = transaction['token']
+            
+            # Simpan Token ke Database
+            booking.payment_token = transaction_token
+            db.session.commit()
+            
+            flash('Booking berhasil! Silakan selesaikan pembayaran.', 'success')
+        except Exception as e:
+            flash(f'Gagal memproses pembayaran: {str(e)}', 'danger')
+
         return redirect(url_for('main.dashboard'))
         
     return render_template('booking/create.html', title='Booking Baru', form=form)

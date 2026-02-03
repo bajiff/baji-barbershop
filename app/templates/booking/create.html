@@ -4,7 +4,7 @@
 <div class="max-w-3xl mx-auto">
     <div class="mb-8">
         <h2 class="text-3xl font-bold text-gray-800">Booking Jadwal Baru</h2>
-        <p class="text-gray-600 mt-2">Silakan pilih layanan dan staff profesional kami.</p>
+        <p class="text-gray-600 mt-2">Pilih kombinasi layanan terbaik untuk penampilan Anda.</p>
     </div>
 
     <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-yellow-500">
@@ -13,16 +13,22 @@
 
             <div class="mb-6">
                 <label class="block text-gray-700 text-sm font-bold mb-2">Pilih Layanan (Bisa lebih dari satu)</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-lg border border-gray-300 max-h-60 overflow-y-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-300 max-h-64 overflow-y-auto custom-scrollbar">
                     {% for subfield in form.service_ids %}
-                        <div class="flex items-center p-2 hover:bg-yellow-50 rounded transition">
-                            {{ subfield(class="w-5 h-5 text-yellow-600 bg-white border-gray-300 rounded focus:ring-yellow-500 cursor-pointer") }}
-                            {{ subfield.label(class="ml-3 text-sm font-medium text-gray-900 cursor-pointer w-full") }}
+                        <div class="relative flex items-start p-2 hover:bg-yellow-50 rounded-lg transition duration-200 cursor-pointer">
+                            <div class="flex items-center h-5">
+                                {{ subfield(class="w-5 h-5 text-yellow-600 bg-white border-gray-300 rounded focus:ring-yellow-500 focus:ring-2 cursor-pointer") }}
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="{{ subfield.id }}" class="font-medium text-gray-900 cursor-pointer select-none">
+                                    {{ subfield.label.text }}
+                                </label>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
                 {% for error in form.service_ids.errors %}
-                    <span class="text-red-500 text-xs">{{ error }}</span>
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                 {% endfor %}
             </div>
 
@@ -34,12 +40,25 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     {{ form.booking_date.label(class="block text-gray-700 text-sm font-bold mb-2") }}
-                    {{ form.booking_date(type="date", class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3 cursor-pointer") }}
+                    {{ form.booking_date(type="date", class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3 cursor-pointer focus:ring-yellow-500 focus:border-yellow-500") }}
                 </div>
                 <div>
                     {{ form.booking_time.label(class="block text-gray-700 text-sm font-bold mb-2") }}
-                    {{ form.booking_time(type="time", class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3 cursor-pointer") }}
+                    {{ form.booking_time(type="time", class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3 cursor-pointer focus:ring-yellow-500 focus:border-yellow-500") }}
                 </div>
+            </div>
+
+            <div class="mb-8">
+                {{ form.notes.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.notes(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3 focus:ring-yellow-500 focus:border-yellow-500", rows="3", placeholder="Contoh: Tolong sampingnya dipotong tipis...") }}
+            </div>
+
+            <div class="flex items-center gap-4 pt-4 border-t border-gray-100">
+                {{ form.submit(class="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg cursor-pointer transition transform hover:-translate-y-1 shadow-lg text-center") }}
+                
+                <a href="{{ url_for('main.dashboard') }}" class="px-6 py-3 text-gray-500 hover:text-gray-700 font-semibold transition bg-gray-100 hover:bg-gray-200 rounded-lg">
+                    Batal
+                </a>
             </div>
         </form>
     </div>
