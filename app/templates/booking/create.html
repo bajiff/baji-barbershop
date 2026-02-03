@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-lg border-t-4 border-yellow-500">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Booking Jadwal Cukur</h2>
+    
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-4">
+            {{ form.service_id.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.service_id(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block p-2.5") }}
+        </div>
+
+        <div class="mb-4">
+            {{ form.barber_id.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.barber_id(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block p-2.5") }}
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                {{ form.booking_date.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.booking_date(type="date", class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5") }}
+            </div>
+            <div>
+                {{ form.booking_time.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.booking_time(type="time", class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5") }}
+            </div>
+        </div>
+
+        <div class="mb-6">
+            {{ form.notes.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+            {{ form.notes(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5", rows="3", placeholder="Contoh: Potongan samping tipis...") }}
+        </div>
+
+        {{ form.submit(class="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg cursor-pointer") }}
+        <a href="{{ url_for('main.dashboard') }}" class="block text-center mt-4 text-gray-500 text-sm hover:underline">Batal</a>
+    </form>
+</div>
+{% endblock %}

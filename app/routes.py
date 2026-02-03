@@ -5,6 +5,9 @@ from app.models import User
 from app.forms import RegistrationForm, LoginForm 
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
+from app.models import User, Barber, Service, Booking # Tambah Booking
+from app.forms import RegistrationForm, LoginForm, BookingForm # Tambah BookingForm
+from datetime import datetime
 
 main = Blueprint('main', __name__)
 
@@ -58,3 +61,42 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
+# --- DASHBOARD (Riwayat Booking) ---
+@main.route("/dashboard")
+@login_required # Wajib login
+def dashboard():
+    # Ambil booking milik user yang sedang login, urutkan dari yang terbaru
+    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.created_at.desc()).all()
+    return render_template('booking/dashboard.html', title='Dashboard Saya', bookings=bookings)
+
+# --- BUAT BOOKING BARU ---
+@main.route("/booking/new", methods=['GET', 'POST'])
+@login_required
+def new_booking():
+    form = BookingForm()
+    
+    # Isi Pilihan Dropdown secara Dinamis dari Database
+    # Format: (value, label) -> (id, nama + harga)
+    form.service_id.choices = [(s.id, f"{s.name} - Rp {s.price:,.0f}") for s in Service.query.all()]
+    form.barber_id.choices = [(b.id, b.name) for b in Barber.query.filter_by(is_active=True).all()]
+    
+    if form.validate_on_submit():
+        booking = Booking(
+            user_id=current_user.id,
+            service_id=form.service_id.data,
+            barber_id=form.barber_id.data,
+            booking_date=form.booking_date.data, # Perbaikan: nama kolom di DB 'booking_time' tipe DateTime
+            # Kita perlu menggabungkan Date dan Time menjadi satu DateTime object
+            booking_time=datetime.combine(form.booking_date.data, form.booking_time.data),
+            notes=form.notes.data,
+            status='pending',
+            payment_status='unpaid'
+        )
+        db.session.add(booking)
+        db.session.commit()
+        flash('Booking berhasil dibuat! Menunggu pembayaran.', 'success')
+        return redirect(url_for('main.dashboard'))
+        
+    return render_template('booking/create.html', title='Booking Baru', form=form)
+
