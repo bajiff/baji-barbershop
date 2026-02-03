@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-WTF
+mysql-connector-python
+python-dotenv
+midtransclient
+alembic
+pytest
