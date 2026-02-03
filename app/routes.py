@@ -54,7 +54,8 @@ def login():
         else:
             flash('Login gagal. Cek email dan password.', 'danger')
             
-    return render_template('auth/login.html', title='Login', form=form)
+    # Jika tidak ada next_page, lempar ke dashboard
+    return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))
 
 # --- LOGOUT ---
 @main.route("/logout")
