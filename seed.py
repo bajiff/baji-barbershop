@@ -1,47 +1,52 @@
 from app import create_app, db
+# seed.py (UPDATE)
+from app import create_app, db
 from app.models import User, Service, Barber
+import os
 
 app = create_app()
 
 with app.app_context():
-    print("🚀 Memulai proses seeding database...")
+    # HAPUS DB LAMA & BUAT BARU (Karena Struktur Berubah)
+    print("⚠️  Mereset Database karena struktur berubah...")
+    db.drop_all()
+    db.create_all()
+    print("✅ Database bersih berhasil dibuat.")
 
-    # --- 1. SERVICES ---
-    if not Service.query.first():
-        s1 = Service(name='Gentlemen Cut', price=50000, duration_minutes=45)
-        s2 = Service(name='Beard Trim', price=25000, duration_minutes=20)
-        s3 = Service(name='Hair Spa & Massage', price=75000, duration_minutes=60)
-        s4 = Service(name='Kids Cut', price=40000, duration_minutes=30)
-        db.session.add_all([s1, s2, s3, s4])
-        print("✅ Layanan berhasil dibuat.")
-    else:
-        print("ℹ️ Layanan sudah ada data. Skip.")
+    # 1. SERVICES (Daftar Baru 14 Item)
+    services_data = [
+        ('Gentlemen Cut', 50000, 45),
+        ('Beard Trim', 25000, 20),
+        ('Hair Spa & Massage', 75000, 60),
+        ('Kids Cut', 40000, 30),
+        ('Classic Taper Fade', 50000, 45),
+        ('Modern Pompadour', 65000, 60),
+        ('Textured Crop / French Crop', 55000, 45),
+        ('Side Part Slick Back', 50000, 45),
+        ('Buzz Cut / Crew Cut', 35000, 30),
+        ('Mullet Modern', 60000, 60),
+        ('Two Block Haircut', 65000, 60),
+        ('Gentleman Cut (Hot Towel)', 55000, 45), # Nama saya bedakan dikit biar unik
+        ('Undercut Disconnected', 55000, 45),
+        ('Beard Trim & Shaping', 30000, 20)
+    ]
 
-    # --- 2. BARBERS ---
-    if not Barber.query.first():
-        b1 = Barber(name='Baji Keisuke', specialty='Long Hair & Fade', is_active=True)
-        b2 = Barber(name='Chifuyu Matsuno', specialty='Undercut Style', is_active=True)
-        b3 = Barber(name='Draken', specialty='Tato & Buzz Cut', is_active=True)
-        db.session.add_all([b1, b2, b3])
-        print("✅ Barber berhasil dibuat.")
-    else:
-        print("ℹ️ Barber sudah ada data. Skip.")
+    for name, price, duration in services_data:
+        s = Service(name=name, price=price, duration_minutes=duration)
+        db.session.add(s)
+    
+    # 2. BARBERS
+    barbers = [
+        Barber(name='Baji Keisuke', specialty='Top Stylist', is_active=True),
+        Barber(name='Chifuyu Matsuno', specialty='Senior Barber', is_active=True),
+        Barber(name='Draken', specialty='Hair Tattoo Expert', is_active=True)
+    ]
+    db.session.add_all(barbers)
 
-    # --- 3. ADMIN USER ---
-    # Cek apakah admin sudah ada
-    admin = User.query.filter_by(email='admin@baji.com').first()
-    if not admin:
-        admin = User(
-            username='admin_baji', 
-            email='admin@baji.com', 
-            phone='081234567890',
-            role='admin'
-        )
-        admin.set_password('admin123') 
-        db.session.add(admin)
-        print("✅ User Admin berhasil dibuat (Pass: admin123).")
-    else:
-        print("ℹ️ User Admin sudah ada. Skip.")
+    # 3. ADMIN USER
+    admin = User(username='admin', email='admin@baji.com', phone='081234567890', role='admin')
+    admin.set_password('admin123')
+    db.session.add(admin)
 
     db.session.commit()
-    print("🎉 Selesai! Database siap digunakan.")
+    print("🎉 Database Seed Selesai dengan Layanan Baru!")

@@ -3,6 +3,8 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from app.models import User
 from wtforms import SelectField, DateField, TimeField, TextAreaField # Tambahkan import ini
+from wtforms import SelectMultipleField
+from wtforms.widgets import ListWidget, CheckboxInput
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -34,4 +36,18 @@ class BookingForm(FlaskForm):
     booking_date = DateField('Tanggal Booking', validators=[DataRequired()])
     booking_time = TimeField('Jam Kedatangan', validators=[DataRequired()])
     notes = TextAreaField('Catatan Tambahan (Opsional)')
+    submit = SubmitField('Konfirmasi Booking') 
+
+class BookingForm(FlaskForm):
+    # Ubah bagian services
+    service_ids = SelectMultipleField('Pilih Layanan (Bisa lebih dari satu)', 
+                                      coerce=int,
+                                      widget=ListWidget(prefix_label=False),
+                                      option_widget=CheckboxInput(),
+                                      validators=[DataRequired()])
+                                      
+    barber_id = SelectField('Pilih Barber', coerce=int, validators=[DataRequired()])
+    booking_date = DateField('Tanggal Booking', validators=[DataRequired()])
+    booking_time = TimeField('Jam Kedatangan', validators=[DataRequired()])
+    notes = TextAreaField('Catatan Tambahan')
     submit = SubmitField('Konfirmasi Booking')

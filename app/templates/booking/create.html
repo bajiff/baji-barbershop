@@ -11,15 +11,24 @@
         <form method="POST" action="">
             {{ form.hidden_tag() }}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    {{ form.service_id.label(class="block text-gray-700 text-sm font-bold mb-2") }}
-                    {{ form.service_id(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block p-3 transition") }}
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Pilih Layanan (Bisa lebih dari satu)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-lg border border-gray-300 max-h-60 overflow-y-auto">
+                    {% for subfield in form.service_ids %}
+                        <div class="flex items-center p-2 hover:bg-yellow-50 rounded transition">
+                            {{ subfield(class="w-5 h-5 text-yellow-600 bg-white border-gray-300 rounded focus:ring-yellow-500 cursor-pointer") }}
+                            {{ subfield.label(class="ml-3 text-sm font-medium text-gray-900 cursor-pointer w-full") }}
+                        </div>
+                    {% endfor %}
                 </div>
-                <div>
-                    {{ form.barber_id.label(class="block text-gray-700 text-sm font-bold mb-2") }}
-                    {{ form.barber_id(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block p-3 transition") }}
-                </div>
+                {% for error in form.service_ids.errors %}
+                    <span class="text-red-500 text-xs">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="mb-6">
+                {{ form.barber_id.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.barber_id(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block p-3 transition") }}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -31,16 +40,6 @@
                     {{ form.booking_time.label(class="block text-gray-700 text-sm font-bold mb-2") }}
                     {{ form.booking_time(type="time", class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3 cursor-pointer") }}
                 </div>
-            </div>
-
-            <div class="mb-8">
-                {{ form.notes.label(class="block text-gray-700 text-sm font-bold mb-2") }}
-                {{ form.notes(class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-3", rows="3", placeholder="Contoh: Tolong jangan terlalu pendek bagian atasnya...") }}
-            </div>
-
-            <div class="flex items-center gap-4">
-                {{ form.submit(class="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg cursor-pointer transition transform hover:-translate-y-1 shadow-lg") }}
-                <a href="{{ url_for('main.dashboard') }}" class="px-6 py-3 text-gray-500 hover:text-gray-700 font-semibold transition">Batal</a>
             </div>
         </form>
     </div>
