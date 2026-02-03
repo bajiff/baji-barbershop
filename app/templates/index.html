@@ -1,14 +1,32 @@
-{% extends "base.html" %}
+{% extends "base_public.html" %}
 
 {% block content %}
-<div class="text-center py-20">
-    <h1 class="text-5xl font-bold text-gray-800 mb-4">Potongan Rambut Premium</h1>
-    <p class="text-xl text-gray-600 mb-8">Booking jadwal cukur Anda tanpa antre.</p>
+<div class="w-full h-screen bg-[url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center relative">
     
-    {% if current_user.is_authenticated %}
-        <a href="#" class="bg-gray-900 text-white px-8 py-3 rounded-lg text-lg font-bold hover:bg-gray-800">Booking Sekarang</a>
-    {% else %}
-        <a href="{{ url_for('main.register') }}" class="bg-yellow-500 text-white px-8 py-3 rounded-lg text-lg font-bold hover:bg-yellow-600">Buat Akun Dulu</a>
-    {% endif %}
+    <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+
+    <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+        <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in-down">
+            Gaya Klasik, <br><span class="text-yellow-500">Sentuhan Modern</span>
+        </h1>
+        <p class="text-gray-300 text-xl mb-10 max-w-2xl mx-auto">
+            Booking jadwal cukur Anda dalam hitungan detik. Hindari antrean, pilih barber favorit, dan nikmati layanan premium.
+        </p>
+        
+        <div class="flex gap-4">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.dashboard') }}" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition duration-300">
+                    Masuk Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('main.register') }}" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition duration-300">
+                    Mulai Booking
+                </a>
+                <a href="{{ url_for('main.login') }}" class="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300">
+                    Login Member
+                </a>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

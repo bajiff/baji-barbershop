@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Baji Barbershop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-gray-900 text-white flex flex-col shadow-2xl transition-all duration-300">
+        <div class="h-20 flex items-center justify-center border-b border-gray-800">
+            <h1 class="text-2xl font-bold text-yellow-500 tracking-widest">BAJI<span class="text-white">APP</span></h1>
+        </div>
+
+        <div class="p-6 border-b border-gray-800 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-gray-900 font-bold text-lg">
+                {{ current_user.username[0] | upper }}
+            </div>
+            <div>
+                <p class="text-sm font-semibold">{{ current_user.username }}</p>
+                <p class="text-xs text-gray-400">Pelanggan</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="{{ url_for('main.dashboard') }}" 
+               class="flex items-center px-4 py-3 rounded-lg transition-colors {{ 'bg-yellow-500 text-gray-900 font-bold shadow-lg' if request.endpoint == 'main.dashboard' else 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+                <i class="fas fa-home w-6"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('main.new_booking') }}" 
+               class="flex items-center px-4 py-3 rounded-lg transition-colors {{ 'bg-yellow-500 text-gray-900 font-bold shadow-lg' if request.endpoint == 'main.new_booking' else 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+                <i class="fas fa-calendar-plus w-6"></i>
+                <span>Booking Baru</span>
+            </a>
+
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-history w-6"></i>
+                <span>Riwayat Transaksi</span>
+            </a>
+            
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-user-cog w-6"></i>
+                <span>Pengaturan Akun</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-gray-800">
+            <a href="{{ url_for('main.logout') }}" class="flex items-center justify-center w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition shadow-md">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <div class="absolute top-4 right-4 z-50 w-full max-w-sm">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="p-4 mb-2 rounded shadow-lg flex justify-between items-center {{ 'bg-green-500 text-white' if category == 'success' else 'bg-red-500 text-white' }}">
+                            <span>{{ message }}</span>
+                            <button onclick="this.parentElement.remove()" class="font-bold ml-2">x</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+</body>
+</html>
