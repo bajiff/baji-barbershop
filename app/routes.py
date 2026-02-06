@@ -8,7 +8,6 @@ from werkzeug.security import check_password_hash
 from app.models import User, Barber, Service, Booking # Tambah Booking
 from app.forms import RegistrationForm, LoginForm, BookingForm # Tambah BookingForm
 from datetime import datetime
-import midtransclient
 import time # Untuk membuat Order ID unik
 from config import Config
 
@@ -93,69 +92,49 @@ def dashboard():
 def new_booking():
     form = BookingForm()
     
-    # Isi Pilihan Checkbox
-    form.service_ids.choices = [(s.id, f"{s.name} (Rp {s.price:,.0f})") for s in Service.query.all()]
+    # 1. POPULATE OPSI DARI DATABASE
+    form.haircut_id.choices = [(s.id, f"{s.name} - Rp {s.price:,.0f}") 
+                               for s in Service.query.filter_by(category='haircut').all()]
+    
+    form.color_id.choices = [(s.id, f"{s.name} - Rp {s.price:,.0f}") 
+                             for s in Service.query.filter_by(category='color').all()]
+    
     form.barber_id.choices = [(b.id, b.name) for b in Barber.query.filter_by(is_active=True).all()]
     
+    # 2. PROSES SIMPAN
     if form.validate_on_submit():
-        # 1. Hitung Total Harga dari Service yang dipilih
-        selected_services = Service.query.filter(Service.id.in_(form.service_ids.data)).all()
-        total_price = sum(service.price for service in selected_services)
+        selected_services = []
         
-        # 2. Simpan Booking ke Database dulu (Status: Unpaid)
+        # Logika Penggabungan Service (Tetap Sama)
+        if form.haircut_id.data:
+            selected_services.append(Service.query.get(form.haircut_id.data))
+        if form.beard_trim.data:
+            s = Service.query.filter_by(category='beard').first() 
+            if s: selected_services.append(s)
+        if form.mustache_trim.data:
+            s = Service.query.filter_by(category='mustache').first()
+            if s: selected_services.append(s)
+        if form.color_id.data:
+            selected_services.append(Service.query.get(form.color_id.data))
+            
+        # Simpan Booking
         booking = Booking(
             user_id=current_user.id,
             barber_id=form.barber_id.data,
             booking_time=datetime.combine(form.booking_date.data, form.booking_time.data),
             notes=form.notes.data,
-            status='pending',
-            payment_status='unpaid'
+            status='pending',        # Status awal: Pending (Menunggu Konfirmasi)
+            payment_status='unpaid'  # Bayar nanti di lokasi
         )
         booking.services = selected_services
-        db.session.add(booking)
-        db.session.commit() # Commit agar dapat booking.id
-
-        # 3. REQUEST TOKEN KE MIDTRANS (SNAP API)
-        # Inisialisasi Snap
-        snap = midtransclient.Snap(
-            is_production=False,
-            server_key=Config.MIDTRANS_SERVER_KEY,
-            client_key=Config.MIDTRANS_CLIENT_KEY
-        )
-
-        # Buat Parameter Transaksi
-        # Order ID harus unik, kita gabungkan ID Booking + Timestamp
-        order_id = f"BAJI-{booking.id}-{int(time.time())}"
         
-        param = {
-            "transaction_details": {
-                "order_id": order_id,
-                "gross_amount": int(total_price)
-            },
-            "customer_details": {
-                "first_name": current_user.username,
-                "email": current_user.email,
-                "phone": current_user.phone,
-            },
-            "item_details": [
-                {"id": s.id, "price": int(s.price), "quantity": 1, "name": s.name[:50]} 
-                for s in selected_services
-            ]
-        }
-
-        try:
-            # Minta Token
-            transaction = snap.create_transaction(param)
-            transaction_token = transaction['token']
-            
-            # Simpan Token ke Database
-            booking.payment_token = transaction_token
-            db.session.commit()
-            
-            flash('Booking berhasil! Silakan selesaikan pembayaran.', 'success')
-        except Exception as e:
-            flash(f'Gagal memproses pembayaran: {str(e)}', 'danger')
-
+        db.session.add(booking)
+        db.session.commit()
+        
+        # HAPUS SEMUA KODE MIDTRANS DISINI
+        # Langsung redirect saja
+        
+        flash('Booking berhasil dikirim! Mohon tunggu konfirmasi admin / datang ke lokasi.', 'success')
         return redirect(url_for('main.dashboard'))
         
     return render_template('booking/create.html', title='Booking Baru', form=form)

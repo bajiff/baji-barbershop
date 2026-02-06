@@ -36,10 +36,21 @@
                         </p>
                         <p class="text-gray-500 text-xs">{{ booking.booking_time.strftime('%H:%M') }} WIB</p>
                     </td>
+                    
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ booking.service.name }}</p>
-                        <p class="text-gray-500 text-xs">Rp {{ "{:,.0f}".format(booking.service.price) }}</p>
+                        <div class="flex flex-col gap-1">
+                            {% for s in booking.services %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                    {{ s.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                        {% set total = booking.services|sum(attribute='price') %}
+                        <p class="text-gray-600 text-xs font-bold mt-2">
+                            Total: Rp {{ "{:,.0f}".format(total) }}
+                        </p>
                     </td>
+                    
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <p class="text-gray-900 whitespace-no-wrap">{{ booking.barber.name }}</p>
                     </td>
@@ -47,18 +58,35 @@
                         <span class="relative inline-block px-3 py-1 font-semibold leading-tight 
                         {% if booking.payment_status == 'paid' %} text-green-900 bg-green-200 
                         {% else %} text-orange-900 bg-orange-200 {% endif %} rounded-full">
-                            <span class="relative">{{ booking.status }} / {{ booking.payment_status }}</span>
+                            <span class="relative text-xs uppercase">{{ booking.status }} / {{ booking.payment_status }}</span>
                         </span>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        {% if booking.payment_status == 'unpaid' and booking.payment_token %}
-                            <button id="pay-button-{{ booking.id }}" 
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm shadow transition"
-                                    onclick="window.snap.pay('{{ booking.payment_token }}')">
-                                Bayar Sekarang 💳
-                            </button>
+                        {% if booking.status == 'pending' %}
+                            <div class="flex flex-col gap-2">
+                                <span class="text-yellow-600 font-bold text-xs bg-yellow-100 px-2 py-1 rounded text-center">
+                                    🕒 Menunggu Konfirmasi
+                                </span>
+                                
+                                <a href="https://wa.me/6289639552070?text=Halo Admin, saya {{ current_user.username }} sudah booking untuk tanggal {{ booking.booking_time.strftime('%d %b') }} jam {{ booking.booking_time.strftime('%H:%M') }}. Mohon dikonfirmasi." 
+                                target="_blank"
+                                class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-2 rounded text-center shadow">
+                                    <i class="fab fa-whatsapp"></i> Konfirmasi via WA
+                                </a>
+                            </div>
+
+                        {% elif booking.status == 'confirmed' %}
+                            <span class="text-blue-600 font-bold text-sm bg-blue-100 px-2 py-1 rounded">
+                                ✅ Siap Dilayani
+                            </span>
+
+                        {% elif booking.status == 'completed' %}
+                            <span class="text-green-600 font-bold text-sm">
+                                ✓ Selesai
+                            </span>
+                            
                         {% else %}
-                            <span class="text-green-600 font-bold text-sm">✓ Lunas</span>
+                            <span class="text-red-500 text-xs">Dibatalkan</span>
                         {% endif %}
                     </td>
                 </tr>
