@@ -1,15 +1,12 @@
-from flask import Blueprint, render_template, url_for, flash, redirect, request
+from flask import Blueprint, render_template, url_for, flash, redirect, request, abort
 from app import db
 from app.models import User
-# IMPORT PENTING YANG TADI KURANG:
 from app.forms import RegistrationForm, LoginForm 
 from flask_login import login_user, current_user, logout_user, login_required
-from werkzeug.security import check_password_hash
 from app.models import User, Barber, Service, Booking # Tambah Booking
 from app.forms import RegistrationForm, LoginForm, BookingForm # Tambah BookingForm
 from datetime import datetime
-import time # Untuk membuat Order ID unik
-from config import Config
+from app.decorators import admin_required # <-- Import Satpam tadi
 
 main = Blueprint('main', __name__)
 
@@ -153,3 +150,36 @@ def new_booking():
         return redirect(url_for('main.dashboard'))
         
     return render_template('booking/create.html', title='Booking Baru', form=form)
+
+# --- ADMIN: DASHBOARD ---
+@main.route("/admin/dashboard")
+@login_required
+@admin_required # Hanya Admin yang boleh masuk
+def admin_dashboard():
+    # Ambil SEMUA booking, urutkan dari yang terbaru
+    bookings = Booking.query.order_by(Booking.created_at.desc()).all()
+    return render_template('admin/index.html', bookings=bookings)
+
+# --- ADMIN: UBAH STATUS ---
+@main.route("/admin/update_status/<int:booking_id>/<new_status>")
+@login_required
+@admin_required
+def update_status(booking_id, new_status):
+    booking = Booking.query.get_or_404(booking_id)
+    
+    # Validasi status agar tidak sembarangan
+    if new_status not in ['confirmed', 'completed', 'cancelled']:
+        flash('Status tidak valid.', 'danger')
+        return redirect(url_for('main.admin_dashboard'))
+    
+    # Update Status
+    booking.status = new_status
+    
+    # Jika status 'completed', otomatis set payment jadi 'paid'
+    if new_status == 'completed':
+        booking.payment_status = 'paid'
+        
+    db.session.commit()
+    
+    flash(f'Booking #{booking.id} berhasil diubah menjadi {new_status}.', 'success')
+    return redirect(url_for('main.admin_dashboard'))

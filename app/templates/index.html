@@ -13,19 +13,18 @@
             Booking jadwal cukur Anda dalam hitungan detik. Hindari antrean, pilih barber favorit, dan nikmati layanan premium.
         </p>
         
-        <div class="flex gap-4">
+        <div class="flex justify-center mt-3">
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('main.dashboard') }}" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition duration-300">
-                    Masuk Dashboard
-                </a>
+                {% set link_tujuan = url_for('main.dashboard') %}
+                {% set teks_tombol = 'Buka Dashboard 🚀' %}
             {% else %}
-                <a href="{{ url_for('main.register') }}" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-8 rounded-full text-lg shadow-lg transform hover:scale-105 transition duration-300">
-                    Mulai Booking
-                </a>
-                <a href="{{ url_for('main.login') }}" class="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300">
-                    Login Member
-                </a>
+                {% set link_tujuan = url_for('main.login') %}
+                {% set teks_tombol = 'Sign In' %}
             {% endif %}
+
+            <a href="{{ link_tujuan }}" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-10 rounded-full text-lg shadow-xl transform hover:scale-105 transition duration-300">
+                {{ teks_tombol }}
+            </a>
         </div>
     </div>
 </div>

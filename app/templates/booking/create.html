@@ -56,23 +56,6 @@
                 </div>
             </div>
 
-            <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
-                    <i class="fas fa-palette mr-2 text-yellow-600"></i> 4. Warnai Rambut (Coloring)
-                </h3>
-                <p class="text-xs text-gray-500 mb-4">*Pilih satu warna (Opsional)</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {% for subfield in form.color_id %}
-                        <label class="relative flex items-center p-3 border rounded-lg cursor-pointer hover:bg-yellow-50 hover:border-yellow-400 transition bg-white">
-                            {{ subfield(class="form-radio h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300") }}
-                            <span class="ml-3 text-sm font-medium text-gray-900">{{ subfield.label.text }}</span>
-                        </label>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <hr class="border-gray-300 mb-8">
-
             <h3 class="text-lg font-bold text-gray-800 mb-4">Detail Reservasi</h3>
             <div class="mb-6">
                 {{ form.barber_id.label(class="block text-gray-700 text-sm font-bold mb-2") }}
