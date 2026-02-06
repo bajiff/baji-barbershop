@@ -82,9 +82,24 @@ def logout():
 @main.route("/dashboard")
 @login_required # Wajib login
 def dashboard():
-    # Ambil booking milik user yang sedang login, urutkan dari yang terbaru
-    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.created_at.desc()).all()
+# Ambil booking yang statusnya Pending atau Confirmed (Yang masih aktif)
+    # Kita gunakan .in_ untuk memfilter banyak status
+    bookings = Booking.query.filter_by(user_id=current_user.id)\
+        .filter(Booking.status.in_(['pending', 'confirmed']))\
+        .order_by(Booking.booking_time.asc())\
+        .all()
     return render_template('booking/dashboard.html', title='Dashboard Saya', bookings=bookings)
+
+# --- ROUTE BARU: HISTORY (Yang Sudah Selesai/Batal) ---
+@main.route("/history")
+@login_required
+def history():
+    # Ambil booking yang statusnya Completed atau Cancelled
+    bookings = Booking.query.filter_by(user_id=current_user.id)\
+        .filter(Booking.status.in_(['completed', 'cancelled']))\
+        .order_by(Booking.booking_time.desc())\
+        .all()
+    return render_template('booking/history.html', title='Riwayat Booking', bookings=bookings)
 
 # --- BUAT BOOKING BARU ---
 @main.route("/booking/new", methods=['GET', 'POST'])
