@@ -1,104 +1,123 @@
 {% extends "base_dashboard.html" %}
 
-{% block head %}
-    <script type="text/javascript"
-      src="https://app.sandbox.midtrans.com/snap/snap.js"
-      data-client-key="{{ config.MIDTRANS_CLIENT_KEY }}">
-    </script>
-{% endblock %}
-
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-3xl font-bold text-gray-800">Dashboard Saya</h2>
-        <a href="{{ url_for('main.new_booking') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow">
-            + Booking Baru
+<div class="max-w-6xl mx-auto pb-24">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h2 class="text-3xl font-bold text-gray-800">Dashboard Saya</h2>
+            <p class="text-gray-600 mt-1">Halo <span class="font-bold text-yellow-600">{{ current_user.username }}</span>, ini jadwal Anda.</p>
+        </div>
+        
+        <a href="{{ url_for('main.new_booking') }}" class="hidden md:inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-yellow-500 hover:text-yellow-400 font-bold py-3 px-6 rounded-lg shadow-lg transition transform hover:-translate-y-1">
+            <i class="fas fa-plus"></i> Booking Baru
         </a>
     </div>
 
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <table class="min-w-full leading-normal">
-            <thead>
-                <tr>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal & Jam</th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Layanan</th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Barber</th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for booking in bookings %}
-                <tr>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap font-bold">
-                            {{ booking.booking_time.strftime('%d %b %Y') }}
-                        </p>
-                        <p class="text-gray-500 text-xs">{{ booking.booking_time.strftime('%H:%M') }} WIB</p>
-                    </td>
+    <div class="flex flex-col gap-6">
+        
+        <div class="hidden md:grid grid-cols-4 gap-4 px-6 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <div>Waktu Kedatangan</div>
+            <div>Detail Paket</div>
+            <div>Barber</div>
+            <div>Status & Aksi</div>
+        </div>
+
+        {% for booking in bookings %}
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition duration-300">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4">
+                
+                <div class="p-6 border-b md:border-b-0 md:border-r border-gray-100 flex items-center gap-4">
+                    <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-900 text-yellow-500 flex flex-col items-center justify-center font-bold shadow-sm">
+                        <span class="text-xs uppercase">{{ booking.booking_time.strftime('%b') }}</span>
+                        <span class="text-xl leading-none">{{ booking.booking_time.strftime('%d') }}</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1 md:hidden">Waktu Kedatangan</p>
+                        <p class="text-gray-900 font-bold text-lg">{{ booking.booking_time.strftime('%H:%M') }} WIB</p>
+                        <p class="text-gray-500 text-sm">{{ booking.booking_time.strftime('%A, %Y') }}</p>
+                    </div>
+                </div>
+
+                <div class="p-6 border-b md:border-b-0 md:border-r border-gray-100 flex flex-col justify-center">
+                    <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-2 md:hidden">Detail Paket</p>
                     
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <div class="flex flex-col gap-1">
-                            {% for s in booking.services %}
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                                    {{ s.name }}
-                                </span>
-                            {% endfor %}
-                        </div>
-                        {% set total = booking.services|sum(attribute='price') %}
-                        <p class="text-gray-600 text-xs font-bold mt-2">
-                            Total: Rp {{ "{:,.0f}".format(total) }}
-                        </p>
-                    </td>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        {% for s in booking.services %}
+                            <span class="px-2 py-1 bg-yellow-50 text-yellow-800 text-xs font-bold rounded border border-yellow-200">
+                                {{ s.name }}
+                            </span>
+                        {% endfor %}
+                    </div>
                     
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">{{ booking.barber.name }}</p>
-                    </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <span class="relative inline-block px-3 py-1 font-semibold leading-tight 
-                        {% if booking.payment_status == 'paid' %} text-green-900 bg-green-200 
-                        {% else %} text-orange-900 bg-orange-200 {% endif %} rounded-full">
-                            <span class="relative text-xs uppercase">{{ booking.status }} / {{ booking.payment_status }}</span>
-                        </span>
-                    </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        {% if booking.status == 'pending' %}
-                            <div class="flex flex-col gap-2">
-                                <span class="text-yellow-600 font-bold text-xs bg-yellow-100 px-2 py-1 rounded text-center">
-                                    🕒 Menunggu Konfirmasi
-                                </span>
-                                
-                                <a href="https://wa.me/6289639552070?text=Halo Admin, saya {{ current_user.username }} sudah booking untuk tanggal {{ booking.booking_time.strftime('%d %b') }} jam {{ booking.booking_time.strftime('%H:%M') }}. Mohon dikonfirmasi." 
-                                target="_blank"
-                                class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-2 rounded text-center shadow">
-                                    <i class="fab fa-whatsapp"></i> Konfirmasi via WA
-                                </a>
+                    {% set total = booking.services|sum(attribute='price') %}
+                    <p class="text-sm font-bold text-gray-900">
+                        Total: <span class="text-green-600">Rp {{ "{:,.0f}".format(total) }}</span>
+                    </p>
+                </div>
+
+                <div class="p-6 border-b md:border-b-0 md:border-r border-gray-100 flex items-center">
+                    <div class="w-full">
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-2 md:hidden">Barber Pilihan</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 border border-gray-200">
+                                <i class="fas fa-user-tie"></i>
                             </div>
+                            <div>
+                                <p class="font-bold text-gray-800">{{ booking.barber.name }}</p>
+                                <p class="text-xs text-gray-500">{{ booking.barber.specialty }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                        {% elif booking.status == 'confirmed' %}
-                            <span class="text-blue-600 font-bold text-sm bg-blue-100 px-2 py-1 rounded">
-                                ✅ Siap Dilayani
+                <div class="p-6 bg-gray-50 md:bg-white flex flex-col justify-center">
+                    <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-2 md:hidden">Status & Aksi</p>
+                    
+                    {% if booking.status == 'pending' %}
+                        <div class="flex items-center gap-2 mb-3 text-yellow-600 font-bold text-sm">
+                            <span class="relative flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
                             </span>
+                            Menunggu Konfirmasi
+                        </div>
+                        <a href="https://wa.me/6281234567890?text=Halo Admin, saya {{ current_user.username }} mau konfirmasi booking..." 
+                           target="_blank"
+                           class="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded shadow flex items-center justify-center gap-2 transition">
+                            <i class="fab fa-whatsapp"></i> Chat Admin
+                        </a>
 
-                        {% elif booking.status == 'completed' %}
-                            <span class="text-green-600 font-bold text-sm">
-                                ✓ Selesai
-                            </span>
-                            
-                        {% else %}
-                            <span class="text-red-500 text-xs">Dibatalkan</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5" class="px-5 py-5 text-center text-gray-500">
-                        Belum ada riwayat booking.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% elif booking.status == 'confirmed' %}
+                        <div class="flex items-center gap-2 mb-2 text-blue-600 font-bold text-sm">
+                            <i class="fas fa-check-circle text-lg"></i> Siap Dilayani
+                        </div>
+                        <div class="bg-blue-50 text-blue-800 text-xs p-2 rounded border border-blue-100">
+                            Silakan datang 10 menit sebelum jadwal. Pembayaran di kasir.
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                <i class="fas fa-calendar-times text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">Tidak ada jadwal aktif</h3>
+            <p class="text-gray-500 mb-6">Jadwal Anda kosong. Yuk gantengin diri sekarang!</p>
+            <a href="{{ url_for('main.new_booking') }}" class="bg-yellow-500 text-gray-900 font-bold py-2 px-6 rounded-full hover:bg-yellow-400 transition">
+                Booking Sekarang
+            </a>
+        </div>
+        {% endfor %}
     </div>
+    
+    <a href="{{ url_for('main.new_booking') }}" class="md:hidden fixed bottom-6 right-6 bg-yellow-500 text-gray-900 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl z-50 hover:bg-yellow-400 transition animate-bounce">
+        <i class="fas fa-plus"></i>
+    </a>
+
 </div>
 {% endblock %}
