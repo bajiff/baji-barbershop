@@ -1,0 +1,28 @@
+# 1. Virtual Environment (INI PALING PENTING)
+# Folder ini isinya ribuan file library, jangan di-upload!
+venv/
+env/
+.venv/
+
+# 2. Python Cache
+# File sampah hasil kompilasi python, bisa dibuat ulang otomatis
+__pycache__/
+*.pyc
+
+# 3. Environment Variables (RAHASIA)
+# File ini berisi password DB & API Key.
+# Jangan upload ke GitHub publik! Tapi kalau upload ZIP manual ke hosting pribadi, boleh dibawa (opsional).
+.env
+
+# 4. Database Lokal
+# Biasanya kita tidak menimpa DB production dengan DB lokal
+*.db
+*.sqlite3
+
+# 5. Konfigurasi Editor (VS Code / PyCharm)
+.vscode/
+.idea/
+
+# 6. File System (Mac/Windows)
+.DS_Store
+Thumbs.db
